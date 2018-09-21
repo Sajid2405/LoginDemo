@@ -94,6 +94,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             sharedPreferences.edit().putString("json", s).apply();
 
+            if(!sharedPreferences.getString("json", "").isEmpty()){
+                Log.i("MY_APP","json is present");
+                Log.i("MY_APP", "Result from SharedPreferences " + sharedPreferences.getString("json", "no data"));
+            }
+
             Log.i("MY_APP", "Result: " + s);
         }
     }
@@ -440,4 +445,3 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 }
-
