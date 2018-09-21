@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -54,7 +55,7 @@ import static android.Manifest.permission.READ_CONTACTS;
 
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    JSONObject jsonObject;
+    SharedPreferences sharedPreferences;
 
     public class CloudConnectAsync2 extends AsyncTask<Void, Void, String> {
         @Override
@@ -91,6 +92,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
+            sharedPreferences.edit().putString("json", s).apply();
+
             Log.i("MY_APP", "Result: " + s);
         }
     }
@@ -119,6 +122,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+
+        sharedPreferences = getSharedPreferences("sharedPreferences", MODE_PRIVATE);
 
         new Thread(new Runnable() {
             @Override
