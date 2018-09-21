@@ -52,49 +52,13 @@ import okhttp3.Response;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
-/**
- * A login screen that offers login via email/password.
- */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    class ROLE{
-        int id, status, created_by, updated_by, tenant_id, code;
-        String name, created_at, updated_at;
-    }
-
-
-    class TENANT {
-        int id, status, created_by, updated_by, allow_same_domain;
-        String name, website, logo, url, created_at, updated_at, attachment_id, company_email, contact_person;
-    }
-
-
-    class PROFILE {
-        int id, status, created_by, updated_by, user_id, tenant_id, gender;
-        String first_name, last_name, avatar, phone_no, created_at, updated_at, attachment_id, bio;
-    }
-
-
-    class USER_WITH_ROLE_TENANT_PROFILE {
-        int id, status, active_tenant_id, active_role_id, is_verified;
-        String username, email, created_by, updated_by, created_at, updated_at, password_updated_at, is_email_verified;
-
-        ROLE role_in_user = new ROLE();
-        TENANT tenant_in_user = new TENANT();
-        PROFILE profile_in_user = new PROFILE();
-    }
-
-
     JSONObject jsonObject;
-    StringBuilder finalResultString = new StringBuilder();
 
-    public class CloudConnectAsync2 extends AsyncTask<Context, Void, String> {
-
-        Context context;
-
+    public class CloudConnectAsync2 extends AsyncTask<Void, Void, String> {
         @Override
-        protected String doInBackground(Context... contexts) {
-            context = contexts[0];
+        protected String doInBackground(Void... voids) {
 
             OkHttpClient okHttpClient = new OkHttpClient();
 
@@ -115,40 +79,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 response = okHttpClient.newCall(request).execute();
                 return response.body().string();
 
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             return null;
-
-
-/*
-        StringBuilder result = new StringBuilder();
-        URL url;
-        HttpURLConnection httpURLConnection;
-        try{
-            url = new URL("https://api.getpostman.com/collections/");
-            httpURLConnection = (HttpURLConnection) url.openConnection();
-            InputStream inputStream = httpURLConnection.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-
-            int data = inputStreamReader.read();
-
-            while(data != -1){
-                Log.i("MY_APP", String.valueOf(data));
-                char dataCh = (char) data;
-
-                result.append(dataCh);
-                data = inputStreamReader.read();
-            }
-
-        }catch (Exception e){
-            Log.i("MY_APP", "InExceptionResult = "+result);
-            Log.i("MY_APP", "Exception:"+e.getMessage());
-        }
-        Log.i("MY_APP", "Result: "+result.toString());
-        return result.toString();*/
         }
 
 
@@ -156,36 +91,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
-            try {
-                jsonObject = new JSONObject(s);
-
-                finalResultString.append("status: "+jsonObject.get("status")).append("\n");
-
-                JSONObject userJsonObject = jsonObject.getJSONObject("user");
-                USER_WITH_ROLE_TENANT_PROFILE user_with_role_tenant_profile = new USER_WITH_ROLE_TENANT_PROFILE();
-                user_with_role_tenant_profile.active_role_id = userJsonObject.getInt("active_role_id");
-                user_with_role_tenant_profile.active_tenant_id = userJsonObject.getInt("active_tenant_id");
-                user_with_role_tenant_profile.created_at = userJsonObject.getString("created_at");
-                user_with_role_tenant_profile.created_by = userJsonObject.getString("created_by");
-                user_with_role_tenant_profile.email = userJsonObject.getString("email");
-                user_with_role_tenant_profile.id = userJsonObject.getInt("id");
-                user_with_role_tenant_profile.is_email_verified = userJsonObject.getString("is_email_verified");
-                user_with_role_tenant_profile.is_verified = userJsonObject.getInt("is_verified");
-                user_with_role_tenant_profile.password_updated_at = userJsonObject.getString("password_updated_at");
-
-
-
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            new AlertDialog.Builder(LoginActivity.this)
-                    .setTitle("Result")
-                    .setMessage(String.valueOf(jsonObject.names()))
-                    .setCancelable(false)
-                    .setPositiveButton("ok", null)
-                    .show();
             Log.i("MY_APP", "Result: " + s);
         }
     }
@@ -196,21 +101,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     TextView textView;
 
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
+
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -241,27 +137,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 });
             }
         }).start();
-/*
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL("https://jsonplaceholder.typicode.com/posts");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-                    for (String line; (line = reader.readLine()) != null;) {
-                        Log.i("MY_APP", line);
-                    }
-                }catch (Exception e){
-                    Log.i("MY_APP", "Ex: "+e.getMessage());
-                }
-            }
-        }).start();*/
-
 
 
         textView = findViewById(R.id.textView);
-
-
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -298,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if(!email.isEmpty() && !password.isEmpty()){
 
                     CloudConnectAsync2 cloudConnectAsync2 = new CloudConnectAsync2();
-                    cloudConnectAsync2.execute(getApplicationContext());
+                    cloudConnectAsync2.execute();
 
                 }else{
                     Toast.makeText(LoginActivity.this, "Email or password invalid!", Toast.LENGTH_SHORT).show();
@@ -340,9 +218,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return false;
     }
 
-    /**
-     * Callback received when a permissions request has been completed.
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -354,11 +229,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
+
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
