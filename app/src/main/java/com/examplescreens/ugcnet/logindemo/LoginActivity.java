@@ -4,9 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -44,24 +46,47 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Authenticator;
+import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.Route;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
+    JSONObject jsonObject;
     SharedPreferences sharedPreferences;
+
+    OkHttpClient okHttpClient = new OkHttpClient();
+/*
+    public class MyAuthenticator implements Authenticator{
+
+        @Nullable
+        @Override
+        public Request authenticate(Route route, Response response) throws IOException {
+
+            if(response.code() == 401){
+                Call<Void> refreshCall = getRe
+            }
+
+            return null;
+        }
+    }*/
+
+
 
     public class CloudConnectAsync2 extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
 
-            OkHttpClient okHttpClient = new OkHttpClient();
+
+
 
             RequestBody requestBody = new FormBody.Builder()
                     .add("email", email)
@@ -70,7 +95,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             Request request = new Request.Builder()
                     .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                    .url("http://159.65.7.75:9000/v1/auth")
+                        .url("http://159.65.7.75:9000/v1/auth")
                     .post(requestBody)
                     .build();
 
@@ -92,11 +117,30 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
-            sharedPreferences.edit().putString("json", s).apply();
+            try {
+                jsonObject = new JSONObject(s);
 
-            if(!sharedPreferences.getString("json", "").isEmpty()){
-                Log.i("MY_APP","json is present");
-                Log.i("MY_APP", "Result from SharedPreferences " + sharedPreferences.getString("json", "no data"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if(!s.isEmpty() && jsonObject.has("refresh_token")){
+                sharedPreferences.edit().putString("json", s).apply();
+
+                if(!sharedPreferences.getString("json", "").isEmpty()){
+                    Log.i("MY_APP","json is present");
+                    Log.i("MY_APP", "Result from SharedPreferences " + sharedPreferences.getString("json", "no data"));
+                }
+
+                startActivity(new Intent(LoginActivity.this, NavigationActivity.class));
+
+            }else{
+                new AlertDialog.Builder(LoginActivity.this)
+                        .setCancelable(false)
+                        .setTitle("Warning!")
+                        .setMessage("Could not retrieve data please check your internet connection & RETRY")
+                        .setPositiveButton("OK", null)
+                        .show();
             }
 
             Log.i("MY_APP", "Result: " + s);
